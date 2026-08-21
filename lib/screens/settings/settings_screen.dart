@@ -38,7 +38,7 @@ class SettingsScreen extends StatelessWidget {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Örn. Melike & Yasin\'in Hazırlıkları'),
+          decoration: const InputDecoration(hintText: 'Örn. Melike & Celal\'in Hazırlıkları'),
         ),
         actions: [
           TextButton(
