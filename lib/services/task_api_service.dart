@@ -14,6 +14,7 @@ class TaskApiService {
   Future<WeddingTask> create(
     String categoryId, {
     required String title,
+    String? subCategory,
     String? description,
     double? estimatedPrice,
     double? actualPrice,
@@ -21,6 +22,7 @@ class TaskApiService {
   }) async {
     final json = await _client.post('/categories/$categoryId/tasks', {
       'title': title,
+      'subCategory': subCategory,
       'description': description,
       'estimatedPrice': estimatedPrice,
       'actualPrice': actualPrice,
@@ -32,6 +34,7 @@ class TaskApiService {
   Future<WeddingTask> update(
     String taskId, {
     required String title,
+    String? subCategory,
     String? description,
     double? estimatedPrice,
     double? actualPrice,
@@ -39,6 +42,7 @@ class TaskApiService {
   }) async {
     final json = await _client.put('/tasks/$taskId', {
       'title': title,
+      'subCategory': subCategory,
       'description': description,
       'estimatedPrice': estimatedPrice,
       'actualPrice': actualPrice,

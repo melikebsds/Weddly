@@ -145,6 +145,7 @@ class WeddingState extends ChangeNotifier {
   Future<void> addTask(
     String categoryId, {
     required String title,
+    String? subCategory,
     String? description,
     double? estimatedPrice,
     double? actualPrice,
@@ -153,6 +154,7 @@ class WeddingState extends ChangeNotifier {
     final task = await _taskApi.create(
       categoryId,
       title: title,
+      subCategory: subCategory,
       description: description,
       estimatedPrice: estimatedPrice,
       actualPrice: actualPrice,
@@ -166,6 +168,7 @@ class WeddingState extends ChangeNotifier {
   Future<void> updateTask(
     WeddingTask task, {
     required String title,
+    String? subCategory,
     String? description,
     double? estimatedPrice,
     double? actualPrice,
@@ -174,6 +177,7 @@ class WeddingState extends ChangeNotifier {
     final updated = await _taskApi.update(
       task.id,
       title: title,
+      subCategory: subCategory,
       description: description,
       estimatedPrice: estimatedPrice,
       actualPrice: actualPrice,

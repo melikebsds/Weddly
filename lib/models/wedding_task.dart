@@ -20,6 +20,7 @@ class WeddingTask {
   final String weddingSpaceId;
   final String categoryId;
   final String title;
+  final String? subCategory;
   final String? description;
   final double? estimatedPrice;
   final double? actualPrice;
@@ -31,6 +32,7 @@ class WeddingTask {
     required this.weddingSpaceId,
     required this.categoryId,
     required this.title,
+    this.subCategory,
     this.description,
     this.estimatedPrice,
     this.actualPrice,
@@ -43,6 +45,7 @@ class WeddingTask {
         weddingSpaceId: json['weddingSpaceId'] as String,
         categoryId: json['categoryId'] as String,
         title: json['title'] as String,
+        subCategory: json['subCategory'] as String?,
         description: json['description'] as String?,
         estimatedPrice: (json['estimatedPrice'] as num?)?.toDouble(),
         actualPrice: (json['actualPrice'] as num?)?.toDouble(),

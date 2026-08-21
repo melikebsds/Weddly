@@ -20,6 +20,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _titleController;
+  late final TextEditingController _subCategoryController;
   late final TextEditingController _estimatedController;
   late final TextEditingController _actualController;
   late final TextEditingController _noteController;
@@ -33,6 +34,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     super.initState();
     final task = widget.task;
     _titleController = TextEditingController(text: task?.title ?? '');
+    _subCategoryController = TextEditingController(text: task?.subCategory ?? '');
     _estimatedController =
         TextEditingController(text: task?.estimatedPrice?.toStringAsFixed(0) ?? '');
     _actualController =
@@ -44,6 +46,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   @override
   void dispose() {
     _titleController.dispose();
+    _subCategoryController.dispose();
     _estimatedController.dispose();
     _actualController.dispose();
     _noteController.dispose();
@@ -76,6 +79,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         await state.updateTask(
           widget.task!,
           title: _titleController.text.trim(),
+          subCategory: _subCategoryController.text.trim().isEmpty
+              ? null
+              : _subCategoryController.text.trim(),
           description: _noteController.text.trim(),
           estimatedPrice: estimated,
           actualPrice: actual,
@@ -85,6 +91,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         await state.addTask(
           widget.category.id,
           title: _titleController.text.trim(),
+          subCategory: _subCategoryController.text.trim().isEmpty
+              ? null
+              : _subCategoryController.text.trim(),
           description: _noteController.text.trim(),
           estimatedPrice: estimated,
           actualPrice: actual,
@@ -115,6 +124,14 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               decoration: const InputDecoration(labelText: 'Görev / Ürün Adı'),
               validator: (value) =>
                   (value == null || value.trim().isEmpty) ? 'Görev adı boş olamaz' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _subCategoryController,
+              decoration: const InputDecoration(
+                labelText: 'Alt Kategori (isteğe bağlı)',
+                hintText: 'Örn. Pişirme, Sofra, Mobilya',
+              ),
             ),
             const SizedBox(height: 12),
             TextFormField(
