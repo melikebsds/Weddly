@@ -27,6 +27,42 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _editSpaceName(BuildContext context) async {
+    final state = context.read<WeddingState>();
+    final controller = TextEditingController(text: state.activeSpace?.name ?? '');
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Hazırlık Alanı Adı'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(hintText: 'Örn. Melike & Yasin\'in Hazırlıkları'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Vazgeç'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName == null || newName.isEmpty) return;
+
+    try {
+      await state.renameActiveSpace(newName);
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(describeError(error))));
+    }
+  }
+
   Future<void> _invitePartner(BuildContext context) async {
     final state = context.read<WeddingState>();
     try {
@@ -110,6 +146,8 @@ class SettingsScreen extends StatelessWidget {
             leading: const Icon(Icons.favorite_outline),
             title: const Text('Aktif Hazırlık Alanı'),
             subtitle: Text(space?.name ?? '-'),
+            trailing: const Icon(Icons.edit_outlined, size: 20),
+            onTap: () => _editSpaceName(context),
           ),
           ListTile(
             leading: const Icon(Icons.event_outlined),

@@ -104,6 +104,15 @@ class WeddingState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> renameActiveSpace(String name) async {
+    final space = activeSpace;
+    if (space == null) return;
+
+    final updated = await _weddingSpaceApi.update(space.id, name: name, weddingDate: space.weddingDate);
+    activeSpace = updated;
+    notifyListeners();
+  }
+
   Future<Invitation> createInvitation() async {
     final space = activeSpace;
     if (space == null) {
