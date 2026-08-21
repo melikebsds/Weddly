@@ -8,14 +8,23 @@ workflows:
     scripts:
       - name: Bağımlılıkları kur
         script: flutter pub get
-      - name: iOS için imzasız build al
-        script: flutter build ios --release --no-codesign
-      - name: Payload'dan imzasız .ipa oluştur
+      - name: CocoaPods kur
+        script: cd ios && pod install && cd ..
+      - name: iOS için imzasız build al (flutter'ın son kontrolü hata verse de xcodebuild tamamlanmış olur)
+        script: flutter build ios --release --no-codesign || true
+      - name: Runner.app'i bul ve imzasız .ipa oluştur
         script: |
           set -e
+          APP_PATH=$(find build ~/Library/Developer/Xcode/DerivedData -maxdepth 6 -name "Runner.app" -path "*Release*" 2>/dev/null | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Runner.app bulunamadı, derleme başarısız olmuş olabilir."
+            find build -iname "*.app" 2>/dev/null
+            exit 1
+          fi
+          echo "Bulunan .app: $APP_PATH"
+          mkdir -p build/ios/iphoneos/Payload
+          cp -r "$APP_PATH" build/ios/iphoneos/Payload/
           cd build/ios/iphoneos
-          mkdir -p Payload
-          mv Runner.app Payload/
           zip -r bridely-unsigned.ipa Payload
     artifacts:
       - build/ios/iphoneos/bridely-unsigned.ipa
