@@ -10,40 +10,43 @@ workflows:
         script: flutter pub get
       - name: CocoaPods kur
         script: cd ios && pod install && cd ..
-      - name: iOS için imzasız build al (flutter'ın son kontrolü hata verse de xcodebuild tamamlanmış olur)
+      - name: Flutter framework/config üret (hata verse de devam, sadece Generated.xcconfig için)
         script: flutter build ios --release --no-codesign || true
+      - name: xcodebuild ile imzasız, tam derleme
+        script: |
+          set -e
+          rm -rf build/ios_derived
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/ios_derived \
+            -destination "generic/platform=iOS" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE="" \
+            build
       - name: Runner.app'i bul, doğrula ve imzasız .ipa oluştur
         script: |
           set -e
-
-          # 1. Önce flutter'ın standart çıktı konumunu dene (en güvenilir olan).
-          CANDIDATE="build/ios/iphoneos/Runner.app"
-          if [ ! -f "$CANDIDATE/Info.plist" ]; then
-            echo "Standart konumda geçerli bir .app bulunamadı, DerivedData taranıyor..."
-            CANDIDATE=""
-            # 2. Info.plist içeren TÜM Runner.app adaylarını bul, en son değiştirileni seç.
-            while IFS= read -r path; do
-              if [ -f "$path/Info.plist" ]; then
-                CANDIDATE="$path"
-              fi
-            done < <(find build "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 8 -name "Runner.app" -path "*Release*" -printf '%T@ %p\n' 2>/dev/null | sort -n | awk '{ $1=""; print substr($0,2) }')
-          fi
+          CANDIDATE=$(find build/ios_derived/Build/Products -maxdepth 2 -name "Runner.app" 2>/dev/null | head -1)
 
           if [ -z "$CANDIDATE" ] || [ ! -f "$CANDIDATE/Info.plist" ]; then
             echo "HATA: Info.plist içeren geçerli bir Runner.app bulunamadı."
-            echo "Bulunan tüm .app adayları:"
-            find build "$HOME/Library/Developer/Xcode/DerivedData" -iname "Runner.app" 2>/dev/null
+            echo "build/ios_derived altındaki tüm .app'ler:"
+            find build/ios_derived -iname "Runner.app" 2>/dev/null
             exit 1
           fi
 
           echo "Kullanılan .app: $CANDIDATE"
           ls "$CANDIDATE"
 
-          rm -rf build/ios/iphoneos/Payload
           mkdir -p build/ios/iphoneos/Payload
+          rm -rf build/ios/iphoneos/Payload/Runner.app
           cp -r "$CANDIDATE" build/ios/iphoneos/Payload/Runner.app
 
-          # Paketlemeden önce son bir doğrulama.
           if [ ! -f "build/ios/iphoneos/Payload/Runner.app/Info.plist" ]; then
             echo "HATA: Kopyalanan Runner.app içinde Info.plist yok."
             exit 1
