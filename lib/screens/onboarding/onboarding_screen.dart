@@ -58,8 +58,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('💍', style: TextStyle(fontSize: 48)),
+              const Text('💍', style: TextStyle(fontSize: 48), textAlign: TextAlign.center),
               const SizedBox(height: 16),
               Text(
                 'Hazırlığa başlayalım',
