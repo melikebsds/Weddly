@@ -15,6 +15,25 @@ enum WeddingTaskStatus {
       };
 }
 
+/// Backend'deki ResponsibleParty enum'ıyla birebir eşleşir (0/1/2/3).
+enum ResponsibleParty {
+  unspecified,
+  bride,
+  groom,
+  both;
+
+  static ResponsibleParty fromValue(int value) => ResponsibleParty.values[value];
+
+  int get value => index;
+
+  String get label => switch (this) {
+        ResponsibleParty.unspecified => 'Belirtilmedi',
+        ResponsibleParty.bride => 'Gelin',
+        ResponsibleParty.groom => 'Damat',
+        ResponsibleParty.both => 'Ortak',
+      };
+}
+
 class WeddingTask {
   final String id;
   final String weddingSpaceId;
@@ -25,6 +44,8 @@ class WeddingTask {
   final double? estimatedPrice;
   final double? actualPrice;
   final String? assignedUserId;
+  final ResponsibleParty responsibleParty;
+  final String? productUrl;
   final WeddingTaskStatus status;
 
   const WeddingTask({
@@ -37,6 +58,8 @@ class WeddingTask {
     this.estimatedPrice,
     this.actualPrice,
     this.assignedUserId,
+    this.responsibleParty = ResponsibleParty.unspecified,
+    this.productUrl,
     this.status = WeddingTaskStatus.toBuy,
   });
 
@@ -50,6 +73,8 @@ class WeddingTask {
         estimatedPrice: (json['estimatedPrice'] as num?)?.toDouble(),
         actualPrice: (json['actualPrice'] as num?)?.toDouble(),
         assignedUserId: json['assignedUserId'] as String?,
+        responsibleParty: ResponsibleParty.fromValue(json['responsibleParty'] as int? ?? 0),
+        productUrl: json['productUrl'] as String?,
         status: WeddingTaskStatus.fromValue(json['status'] as int? ?? 0),
       );
 }

@@ -30,13 +30,7 @@ class HomeScreen extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 16),
-          if (days != null)
-            SectionCard(
-              child: Text(
-                'Evliliğe $days gün kaldı 💍',
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
+          if (days != null) _CountdownCard(days: days),
           const SizedBox(height: 16),
           SectionCard(
             title: 'Hazırlık Durumu',
@@ -82,6 +76,67 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
         ),
+      ),
+    );
+  }
+}
+
+class _CountdownCard extends StatelessWidget {
+  final int days;
+
+  const _CountdownCard({required this.days});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, Color(0xFFB94A63)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'BÜYÜK GÜNE KALAN',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$days',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 56,
+              fontWeight: FontWeight.bold,
+              height: 1,
+            ),
+          ),
+          const Text(
+            'GÜN 💍',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
       ),
     );
   }

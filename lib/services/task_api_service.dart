@@ -18,6 +18,8 @@ class TaskApiService {
     String? description,
     double? estimatedPrice,
     double? actualPrice,
+    ResponsibleParty responsibleParty = ResponsibleParty.unspecified,
+    String? productUrl,
     WeddingTaskStatus status = WeddingTaskStatus.toBuy,
   }) async {
     final json = await _client.post('/categories/$categoryId/tasks', {
@@ -26,6 +28,8 @@ class TaskApiService {
       'description': description,
       'estimatedPrice': estimatedPrice,
       'actualPrice': actualPrice,
+      'responsibleParty': responsibleParty.value,
+      'productUrl': productUrl,
       'status': status.value,
     });
     return WeddingTask.fromJson(json);
@@ -38,6 +42,8 @@ class TaskApiService {
     String? description,
     double? estimatedPrice,
     double? actualPrice,
+    required ResponsibleParty responsibleParty,
+    String? productUrl,
     required WeddingTaskStatus status,
   }) async {
     final json = await _client.put('/tasks/$taskId', {
@@ -46,6 +52,8 @@ class TaskApiService {
       'description': description,
       'estimatedPrice': estimatedPrice,
       'actualPrice': actualPrice,
+      'responsibleParty': responsibleParty.value,
+      'productUrl': productUrl,
       'status': status.value,
     });
     return WeddingTask.fromJson(json);

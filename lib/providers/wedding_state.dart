@@ -149,6 +149,8 @@ class WeddingState extends ChangeNotifier {
     String? description,
     double? estimatedPrice,
     double? actualPrice,
+    ResponsibleParty responsibleParty = ResponsibleParty.unspecified,
+    String? productUrl,
     WeddingTaskStatus status = WeddingTaskStatus.toBuy,
   }) async {
     final task = await _taskApi.create(
@@ -158,6 +160,8 @@ class WeddingState extends ChangeNotifier {
       description: description,
       estimatedPrice: estimatedPrice,
       actualPrice: actualPrice,
+      responsibleParty: responsibleParty,
+      productUrl: productUrl,
       status: status,
     );
     tasksByCategory[categoryId] = [...tasksForCategory(categoryId), task];
@@ -172,6 +176,8 @@ class WeddingState extends ChangeNotifier {
     String? description,
     double? estimatedPrice,
     double? actualPrice,
+    required ResponsibleParty responsibleParty,
+    String? productUrl,
     required WeddingTaskStatus status,
   }) async {
     final updated = await _taskApi.update(
@@ -181,6 +187,8 @@ class WeddingState extends ChangeNotifier {
       description: description,
       estimatedPrice: estimatedPrice,
       actualPrice: actualPrice,
+      responsibleParty: responsibleParty,
+      productUrl: productUrl,
       status: status,
     );
     _replaceTask(updated);

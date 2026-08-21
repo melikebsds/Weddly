@@ -24,7 +24,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   late final TextEditingController _estimatedController;
   late final TextEditingController _actualController;
   late final TextEditingController _noteController;
+  late final TextEditingController _productUrlController;
   WeddingTaskStatus _status = WeddingTaskStatus.toBuy;
+  ResponsibleParty _responsibleParty = ResponsibleParty.unspecified;
   bool _isSaving = false;
 
   bool get _isEditing => widget.task != null;
@@ -40,7 +42,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     _actualController =
         TextEditingController(text: task?.actualPrice?.toStringAsFixed(0) ?? '');
     _noteController = TextEditingController(text: task?.description ?? '');
+    _productUrlController = TextEditingController(text: task?.productUrl ?? '');
     _status = task?.status ?? WeddingTaskStatus.toBuy;
+    _responsibleParty = task?.responsibleParty ?? ResponsibleParty.unspecified;
   }
 
   @override
@@ -50,6 +54,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     _estimatedController.dispose();
     _actualController.dispose();
     _noteController.dispose();
+    _productUrlController.dispose();
     super.dispose();
   }
 
@@ -85,6 +90,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           description: _noteController.text.trim(),
           estimatedPrice: estimated,
           actualPrice: actual,
+          responsibleParty: _responsibleParty,
+          productUrl: _productUrlController.text.trim().isEmpty
+              ? null
+              : _productUrlController.text.trim(),
           status: _status,
         );
       } else {
@@ -97,6 +106,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           description: _noteController.text.trim(),
           estimatedPrice: estimated,
           actualPrice: actual,
+          responsibleParty: _responsibleParty,
+          productUrl: _productUrlController.text.trim().isEmpty
+              ? null
+              : _productUrlController.text.trim(),
           status: _status,
         );
       }
@@ -149,9 +162,38 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
             ),
             const SizedBox(height: 12),
             TextFormField(
+              controller: _productUrlController,
+              decoration: const InputDecoration(
+                labelText: 'Ürün Linki (isteğe bağlı)',
+                hintText: 'https://...',
+              ),
+              keyboardType: TextInputType.url,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
               controller: _noteController,
               decoration: const InputDecoration(labelText: 'Not'),
               maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Sorumlu', style: Theme.of(context).textTheme.labelLarge),
+            ),
+            const SizedBox(height: 8),
+            SegmentedButton<ResponsibleParty>(
+              segments: const [
+                ButtonSegment(value: ResponsibleParty.bride, label: Text('Gelin')),
+                ButtonSegment(value: ResponsibleParty.groom, label: Text('Damat')),
+                ButtonSegment(value: ResponsibleParty.both, label: Text('Ortak')),
+              ],
+              selected: {
+                _responsibleParty == ResponsibleParty.unspecified
+                    ? ResponsibleParty.both
+                    : _responsibleParty,
+              },
+              onSelectionChanged: (selection) =>
+                  setState(() => _responsibleParty = selection.first),
             ),
             const SizedBox(height: 16),
             Align(
