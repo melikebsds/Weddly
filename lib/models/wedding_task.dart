@@ -1,3 +1,20 @@
+/// Backend'deki WeddingTaskStatus enum'ıyla birebir eşleşir (0/1/2).
+enum WeddingTaskStatus {
+  toBuy,
+  bought,
+  notNeeded;
+
+  static WeddingTaskStatus fromValue(int value) => WeddingTaskStatus.values[value];
+
+  int get value => index;
+
+  String get label => switch (this) {
+        WeddingTaskStatus.toBuy => 'Alınacak',
+        WeddingTaskStatus.bought => 'Alındı',
+        WeddingTaskStatus.notNeeded => 'İhtiyaç Yok',
+      };
+}
+
 class WeddingTask {
   final String id;
   final String weddingSpaceId;
@@ -7,7 +24,7 @@ class WeddingTask {
   final double? estimatedPrice;
   final double? actualPrice;
   final String? assignedUserId;
-  final bool isCompleted;
+  final WeddingTaskStatus status;
 
   const WeddingTask({
     required this.id,
@@ -18,7 +35,7 @@ class WeddingTask {
     this.estimatedPrice,
     this.actualPrice,
     this.assignedUserId,
-    this.isCompleted = false,
+    this.status = WeddingTaskStatus.toBuy,
   });
 
   factory WeddingTask.fromJson(Map<String, dynamic> json) => WeddingTask(
@@ -30,6 +47,6 @@ class WeddingTask {
         estimatedPrice: (json['estimatedPrice'] as num?)?.toDouble(),
         actualPrice: (json['actualPrice'] as num?)?.toDouble(),
         assignedUserId: json['assignedUserId'] as String?,
-        isCompleted: json['isCompleted'] as bool? ?? false,
+        status: WeddingTaskStatus.fromValue(json['status'] as int? ?? 0),
       );
 }

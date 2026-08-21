@@ -23,7 +23,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   late final TextEditingController _estimatedController;
   late final TextEditingController _actualController;
   late final TextEditingController _noteController;
-  bool _isCompleted = false;
+  WeddingTaskStatus _status = WeddingTaskStatus.toBuy;
   bool _isSaving = false;
 
   bool get _isEditing => widget.task != null;
@@ -38,7 +38,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     _actualController =
         TextEditingController(text: task?.actualPrice?.toStringAsFixed(0) ?? '');
     _noteController = TextEditingController(text: task?.description ?? '');
-    _isCompleted = task?.isCompleted ?? false;
+    _status = task?.status ?? WeddingTaskStatus.toBuy;
   }
 
   @override
@@ -79,7 +79,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           description: _noteController.text.trim(),
           estimatedPrice: estimated,
           actualPrice: actual,
-          isCompleted: _isCompleted,
+          status: _status,
         );
       } else {
         await state.addTask(
@@ -88,7 +88,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           description: _noteController.text.trim(),
           estimatedPrice: estimated,
           actualPrice: actual,
-          isCompleted: _isCompleted,
+          status: _status,
         );
       }
 
@@ -136,12 +136,18 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               decoration: const InputDecoration(labelText: 'Not'),
               maxLines: 3,
             ),
-            const SizedBox(height: 12),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Tamamlandı'),
-              value: _isCompleted,
-              onChanged: (value) => setState(() => _isCompleted = value),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Durum', style: Theme.of(context).textTheme.labelLarge),
+            ),
+            const SizedBox(height: 8),
+            SegmentedButton<WeddingTaskStatus>(
+              segments: WeddingTaskStatus.values
+                  .map((status) => ButtonSegment(value: status, label: Text(status.label)))
+                  .toList(),
+              selected: {_status},
+              onSelectionChanged: (selection) => setState(() => _status = selection.first),
             ),
             const SizedBox(height: 20),
             ElevatedButton(

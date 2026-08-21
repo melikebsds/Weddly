@@ -6,17 +6,31 @@ import '../models/wedding_task.dart';
 
 class TaskListTile extends StatelessWidget {
   final WeddingTask task;
-  final VoidCallback onToggle;
+  final ValueChanged<WeddingTaskStatus> onStatusChanged;
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
   const TaskListTile({
     super.key,
     required this.task,
-    required this.onToggle,
+    required this.onStatusChanged,
     required this.onTap,
     required this.onDelete,
   });
+
+  Color _statusColor(WeddingTaskStatus status) => switch (status) {
+        WeddingTaskStatus.toBuy => AppColors.textMuted,
+        WeddingTaskStatus.bought => AppColors.success,
+        WeddingTaskStatus.notNeeded => AppColors.textMuted,
+      };
+
+  IconData _statusIcon(WeddingTaskStatus status) => switch (status) {
+        WeddingTaskStatus.toBuy => Icons.radio_button_unchecked,
+        WeddingTaskStatus.bought => Icons.check_circle,
+        WeddingTaskStatus.notNeeded => Icons.block,
+      };
+
+  bool get _isDimmed => task.status != WeddingTaskStatus.toBuy;
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +38,20 @@ class TaskListTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
         onTap: onTap,
-        leading: Checkbox(value: task.isCompleted, onChanged: (_) => onToggle()),
+        leading: PopupMenuButton<WeddingTaskStatus>(
+          initialValue: task.status,
+          onSelected: onStatusChanged,
+          icon: Icon(_statusIcon(task.status), color: _statusColor(task.status)),
+          itemBuilder: (context) => WeddingTaskStatus.values
+              .map((status) => PopupMenuItem(value: status, child: Text(status.label)))
+              .toList(),
+        ),
         title: Text(
           task.title,
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-            color: task.isCompleted ? AppColors.textMuted : AppColors.textDark,
+            decoration: _isDimmed ? TextDecoration.lineThrough : null,
+            color: _isDimmed ? AppColors.textMuted : AppColors.textDark,
           ),
         ),
         subtitle: Column(
@@ -39,6 +60,9 @@ class TaskListTile extends StatelessWidget {
             Text('Tahmini: ${formatCurrency(task.estimatedPrice)}'),
             if (task.actualPrice != null)
               Text('Gerçek: ${formatCurrency(task.actualPrice)}'),
+            if (task.status == WeddingTaskStatus.notNeeded)
+              const Text('İhtiyaç yok olarak işaretlendi',
+                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12)),
           ],
         ),
         trailing: IconButton(

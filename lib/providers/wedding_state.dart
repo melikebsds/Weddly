@@ -131,9 +131,9 @@ class WeddingState extends ChangeNotifier {
     return completedTaskCount() / total;
   }
 
-  double estimatedTotal() => _allTasks().fold(0, (sum, t) => sum + (t.estimatedPrice ?? 0));
+  double estimatedTotal() => _budgetRelevantTasks().fold(0, (sum, t) => sum + (t.estimatedPrice ?? 0));
 
-  double actualTotal() => _allTasks().fold(0, (sum, t) => sum + (t.actualPrice ?? 0));
+  double actualTotal() => _budgetRelevantTasks().fold(0, (sum, t) => sum + (t.actualPrice ?? 0));
 
   int? daysUntilWedding() {
     final weddingDate = activeSpace?.weddingDate;
@@ -148,7 +148,7 @@ class WeddingState extends ChangeNotifier {
     String? description,
     double? estimatedPrice,
     double? actualPrice,
-    bool isCompleted = false,
+    WeddingTaskStatus status = WeddingTaskStatus.toBuy,
   }) async {
     final task = await _taskApi.create(
       categoryId,
@@ -156,7 +156,7 @@ class WeddingState extends ChangeNotifier {
       description: description,
       estimatedPrice: estimatedPrice,
       actualPrice: actualPrice,
-      isCompleted: isCompleted,
+      status: status,
     );
     tasksByCategory[categoryId] = [...tasksForCategory(categoryId), task];
     await _refreshCategoryCounts();
@@ -169,7 +169,7 @@ class WeddingState extends ChangeNotifier {
     String? description,
     double? estimatedPrice,
     double? actualPrice,
-    required bool isCompleted,
+    required WeddingTaskStatus status,
   }) async {
     final updated = await _taskApi.update(
       task.id,
@@ -177,7 +177,7 @@ class WeddingState extends ChangeNotifier {
       description: description,
       estimatedPrice: estimatedPrice,
       actualPrice: actualPrice,
-      isCompleted: isCompleted,
+      status: status,
     );
     _replaceTask(updated);
     await _refreshCategoryCounts();
@@ -192,8 +192,8 @@ class WeddingState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleCompleted(WeddingTask task) async {
-    final updated = await _taskApi.setCompleted(task.id, !task.isCompleted);
+  Future<void> setTaskStatus(WeddingTask task, WeddingTaskStatus status) async {
+    final updated = await _taskApi.setStatus(task.id, status);
     _replaceTask(updated);
     await _refreshCategoryCounts();
     notifyListeners();
@@ -213,5 +213,9 @@ class WeddingState extends ChangeNotifier {
     categories = await _categoryApi.getForSpace(activeSpace!.id);
   }
 
-  List<WeddingTask> _allTasks() => tasksByCategory.values.expand((tasks) => tasks).toList();
+  /// İhtiyaç Yok işaretlenen görevler bütçe hesaplamalarından tamamen hariç tutulur.
+  List<WeddingTask> _budgetRelevantTasks() => tasksByCategory.values
+      .expand((tasks) => tasks)
+      .where((t) => t.status != WeddingTaskStatus.notNeeded)
+      .toList();
 }

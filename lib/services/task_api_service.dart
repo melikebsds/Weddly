@@ -17,14 +17,14 @@ class TaskApiService {
     String? description,
     double? estimatedPrice,
     double? actualPrice,
-    bool isCompleted = false,
+    WeddingTaskStatus status = WeddingTaskStatus.toBuy,
   }) async {
     final json = await _client.post('/categories/$categoryId/tasks', {
       'title': title,
       'description': description,
       'estimatedPrice': estimatedPrice,
       'actualPrice': actualPrice,
-      'isCompleted': isCompleted,
+      'status': status.value,
     });
     return WeddingTask.fromJson(json);
   }
@@ -35,22 +35,22 @@ class TaskApiService {
     String? description,
     double? estimatedPrice,
     double? actualPrice,
-    required bool isCompleted,
+    required WeddingTaskStatus status,
   }) async {
     final json = await _client.put('/tasks/$taskId', {
       'title': title,
       'description': description,
       'estimatedPrice': estimatedPrice,
       'actualPrice': actualPrice,
-      'isCompleted': isCompleted,
+      'status': status.value,
     });
     return WeddingTask.fromJson(json);
   }
 
   Future<void> delete(String taskId) => _client.delete('/tasks/$taskId');
 
-  Future<WeddingTask> setCompleted(String taskId, bool isCompleted) async {
-    final json = await _client.patch('/tasks/$taskId/complete', {'isCompleted': isCompleted});
+  Future<WeddingTask> setStatus(String taskId, WeddingTaskStatus status) async {
+    final json = await _client.patch('/tasks/$taskId/status', {'status': status.value});
     return WeddingTask.fromJson(json);
   }
 }

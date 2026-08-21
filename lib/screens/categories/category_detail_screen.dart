@@ -38,7 +38,8 @@ class CategoryDetailScreen extends StatelessWidget {
                 final WeddingTask task = tasks[index];
                 return TaskListTile(
                   task: task,
-                  onToggle: () => _handle(context, () => state.toggleCompleted(task)),
+                  onStatusChanged: (status) =>
+                      _handle(context, () => state.setTaskStatus(task, status)),
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => TaskFormScreen(category: category, task: task),
