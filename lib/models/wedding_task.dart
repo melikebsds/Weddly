@@ -46,6 +46,7 @@ class WeddingTask {
   final String? assignedUserId;
   final ResponsibleParty responsibleParty;
   final String? productUrl;
+  final DateTime? dueDate;
   final WeddingTaskStatus status;
 
   const WeddingTask({
@@ -60,6 +61,7 @@ class WeddingTask {
     this.assignedUserId,
     this.responsibleParty = ResponsibleParty.unspecified,
     this.productUrl,
+    this.dueDate,
     this.status = WeddingTaskStatus.toBuy,
   });
 
@@ -75,6 +77,7 @@ class WeddingTask {
         assignedUserId: json['assignedUserId'] as String?,
         responsibleParty: ResponsibleParty.fromValue(json['responsibleParty'] as int? ?? 0),
         productUrl: json['productUrl'] as String?,
+        dueDate: json['dueDate'] == null ? null : DateTime.parse(json['dueDate'] as String),
         status: WeddingTaskStatus.fromValue(json['status'] as int? ?? 0),
       );
 }

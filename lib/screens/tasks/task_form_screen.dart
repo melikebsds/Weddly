@@ -27,6 +27,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   late final TextEditingController _productUrlController;
   WeddingTaskStatus _status = WeddingTaskStatus.toBuy;
   ResponsibleParty _responsibleParty = ResponsibleParty.unspecified;
+  DateTime? _dueDate;
   bool _isSaving = false;
 
   bool get _isEditing => widget.task != null;
@@ -45,6 +46,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     _productUrlController = TextEditingController(text: task?.productUrl ?? '');
     _status = task?.status ?? WeddingTaskStatus.toBuy;
     _responsibleParty = task?.responsibleParty ?? ResponsibleParty.unspecified;
+    _dueDate = task?.dueDate;
   }
 
   @override
@@ -94,6 +96,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           productUrl: _productUrlController.text.trim().isEmpty
               ? null
               : _productUrlController.text.trim(),
+          dueDate: _dueDate,
           status: _status,
         );
       } else {
@@ -110,6 +113,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           productUrl: _productUrlController.text.trim().isEmpty
               ? null
               : _productUrlController.text.trim(),
+          dueDate: _dueDate,
           status: _status,
         );
       }
@@ -175,6 +179,32 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               decoration: const InputDecoration(labelText: 'Not'),
               maxLines: 3,
             ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _dueDate ?? DateTime.now(),
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                );
+                if (picked != null) setState(() => _dueDate = picked);
+              },
+              icon: const Icon(Icons.event_outlined),
+              label: Text(
+                _dueDate == null
+                    ? 'Vade / Son Ödeme Tarihi (isteğe bağlı)'
+                    : '${_dueDate!.day}.${_dueDate!.month}.${_dueDate!.year}',
+              ),
+            ),
+            if (_dueDate != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => setState(() => _dueDate = null),
+                  child: const Text('Tarihi Kaldır'),
+                ),
+              ),
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerLeft,

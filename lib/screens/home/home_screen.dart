@@ -74,8 +74,62 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
+            if (state.upcomingPayments().isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _UpcomingPaymentsCard(state: state),
+            ],
         ],
         ),
+      ),
+    );
+  }
+}
+
+class _UpcomingPaymentsCard extends StatelessWidget {
+  final WeddingState state;
+
+  const _UpcomingPaymentsCard({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final upcoming = state.upcomingPayments().take(3).toList();
+    final monthTotal = state.upcomingPaymentsTotalThisMonth();
+
+    return SectionCard(
+      title: 'Yaklaşan Ödemeler',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (monthTotal > 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                'Bu ay yapılacak ödemeler toplamı: ${formatCurrency(monthTotal)}',
+                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+              ),
+            ),
+          for (final task in upcoming)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(task.title, overflow: TextOverflow.ellipsis),
+                  ),
+                  Text(
+                    '${task.dueDate!.day}.${task.dueDate!.month}.${task.dueDate!.year}',
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    formatCurrency(task.estimatedPrice),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

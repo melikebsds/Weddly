@@ -151,6 +151,7 @@ class WeddingState extends ChangeNotifier {
     double? actualPrice,
     ResponsibleParty responsibleParty = ResponsibleParty.unspecified,
     String? productUrl,
+    DateTime? dueDate,
     WeddingTaskStatus status = WeddingTaskStatus.toBuy,
   }) async {
     final task = await _taskApi.create(
@@ -162,6 +163,7 @@ class WeddingState extends ChangeNotifier {
       actualPrice: actualPrice,
       responsibleParty: responsibleParty,
       productUrl: productUrl,
+      dueDate: dueDate,
       status: status,
     );
     tasksByCategory[categoryId] = [...tasksForCategory(categoryId), task];
@@ -178,6 +180,7 @@ class WeddingState extends ChangeNotifier {
     double? actualPrice,
     required ResponsibleParty responsibleParty,
     String? productUrl,
+    DateTime? dueDate,
     required WeddingTaskStatus status,
   }) async {
     final updated = await _taskApi.update(
@@ -189,6 +192,7 @@ class WeddingState extends ChangeNotifier {
       actualPrice: actualPrice,
       responsibleParty: responsibleParty,
       productUrl: productUrl,
+      dueDate: dueDate,
       status: status,
     );
     _replaceTask(updated);
@@ -230,4 +234,21 @@ class WeddingState extends ChangeNotifier {
       .expand((tasks) => tasks)
       .where((t) => t.status != WeddingTaskStatus.notNeeded)
       .toList();
+
+  /// Vadesi olan ve henüz ödenmemiş (Alınacak) görevleri tarihe göre sıralı döner.
+  List<WeddingTask> upcomingPayments() {
+    final tasks = _budgetRelevantTasks()
+        .where((t) => t.dueDate != null && t.status == WeddingTaskStatus.toBuy)
+        .toList();
+    tasks.sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
+    return tasks;
+  }
+
+  /// Bu ay vadesi gelen ödenmemiş görevlerin tahmini tutar toplamı.
+  double upcomingPaymentsTotalThisMonth() {
+    final now = DateTime.now();
+    return upcomingPayments()
+        .where((t) => t.dueDate!.year == now.year && t.dueDate!.month == now.month)
+        .fold(0, (sum, t) => sum + (t.estimatedPrice ?? 0));
+  }
 }

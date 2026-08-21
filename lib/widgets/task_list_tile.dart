@@ -75,6 +75,8 @@ class TaskListTile extends StatelessWidget {
             if (task.status == WeddingTaskStatus.notNeeded)
               const Text('İhtiyaç yok olarak işaretlendi',
                   style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12)),
+            if (task.dueDate != null && task.status == WeddingTaskStatus.toBuy)
+              _DueDateBadge(dueDate: task.dueDate!),
           ],
         ),
         trailing: (task.productUrl != null && task.productUrl!.isNotEmpty)
@@ -84,6 +86,39 @@ class TaskListTile extends StatelessWidget {
               )
             : null,
         isThreeLine: true,
+      ),
+    );
+  }
+}
+
+class _DueDateBadge extends StatelessWidget {
+  final DateTime dueDate;
+
+  const _DueDateBadge({required this.dueDate});
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final daysLeft = dueDate.difference(today).inDays;
+
+    final isOverdue = daysLeft < 0;
+    final isSoon = daysLeft >= 0 && daysLeft <= 7;
+    final color = isOverdue ? Colors.red : (isSoon ? Colors.orange : AppColors.textMuted);
+
+    final label = isOverdue
+        ? 'Vadesi geçti (${dueDate.day}.${dueDate.month}.${dueDate.year})'
+        : 'Vade: ${dueDate.day}.${dueDate.month}.${dueDate.year}';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.event_outlined, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(label, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w600)),
+        ],
       ),
     );
   }
