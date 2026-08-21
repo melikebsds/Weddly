@@ -12,19 +12,46 @@ workflows:
         script: cd ios && pod install && cd ..
       - name: iOS için imzasız build al (flutter'ın son kontrolü hata verse de xcodebuild tamamlanmış olur)
         script: flutter build ios --release --no-codesign || true
-      - name: Runner.app'i bul ve imzasız .ipa oluştur
+      - name: Runner.app'i bul, doğrula ve imzasız .ipa oluştur
         script: |
           set -e
-          APP_PATH=$(find build ~/Library/Developer/Xcode/DerivedData -maxdepth 6 -name "Runner.app" -path "*Release*" 2>/dev/null | head -1)
-          if [ -z "$APP_PATH" ]; then
-            echo "Runner.app bulunamadı, derleme başarısız olmuş olabilir."
-            find build -iname "*.app" 2>/dev/null
+
+          # 1. Önce flutter'ın standart çıktı konumunu dene (en güvenilir olan).
+          CANDIDATE="build/ios/iphoneos/Runner.app"
+          if [ ! -f "$CANDIDATE/Info.plist" ]; then
+            echo "Standart konumda geçerli bir .app bulunamadı, DerivedData taranıyor..."
+            CANDIDATE=""
+            # 2. Info.plist içeren TÜM Runner.app adaylarını bul, en son değiştirileni seç.
+            while IFS= read -r path; do
+              if [ -f "$path/Info.plist" ]; then
+                CANDIDATE="$path"
+              fi
+            done < <(find build "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 8 -name "Runner.app" -path "*Release*" -printf '%T@ %p\n' 2>/dev/null | sort -n | awk '{ $1=""; print substr($0,2) }')
+          fi
+
+          if [ -z "$CANDIDATE" ] || [ ! -f "$CANDIDATE/Info.plist" ]; then
+            echo "HATA: Info.plist içeren geçerli bir Runner.app bulunamadı."
+            echo "Bulunan tüm .app adayları:"
+            find build "$HOME/Library/Developer/Xcode/DerivedData" -iname "Runner.app" 2>/dev/null
             exit 1
           fi
-          echo "Bulunan .app: $APP_PATH"
+
+          echo "Kullanılan .app: $CANDIDATE"
+          ls "$CANDIDATE"
+
+          rm -rf build/ios/iphoneos/Payload
           mkdir -p build/ios/iphoneos/Payload
-          cp -r "$APP_PATH" build/ios/iphoneos/Payload/
+          cp -r "$CANDIDATE" build/ios/iphoneos/Payload/Runner.app
+
+          # Paketlemeden önce son bir doğrulama.
+          if [ ! -f "build/ios/iphoneos/Payload/Runner.app/Info.plist" ]; then
+            echo "HATA: Kopyalanan Runner.app içinde Info.plist yok."
+            exit 1
+          fi
+
           cd build/ios/iphoneos
+          rm -f bridely-unsigned.ipa
           zip -r bridely-unsigned.ipa Payload
+          unzip -l bridely-unsigned.ipa | head -20
     artifacts:
       - build/ios/iphoneos/bridely-unsigned.ipa
