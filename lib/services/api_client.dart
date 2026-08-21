@@ -11,8 +11,10 @@ class ApiClient {
       : _storage = storage ?? SecureStorageService(),
         _dio = Dio(BaseOptions(
           baseUrl: apiBaseUrl,
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 10),
+          // Render'ın ücretsiz katmanı hareketsizlikte uyur; ilk istek
+          // sunucuyu uyandırırken 50 saniyeye kadar sürebilir.
+          connectTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(seconds: 60),
         )) {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
