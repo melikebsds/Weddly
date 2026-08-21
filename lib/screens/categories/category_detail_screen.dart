@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/task_export.dart';
 import '../../models/category.dart';
 import '../../models/wedding_task.dart';
 import '../../providers/auth_provider.dart';
@@ -83,7 +84,25 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     final grouped = _groupBySubCategory(filtered);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.category.name)),
+      appBar: AppBar(
+        title: Text(widget.category.name),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.ios_share),
+            onSelected: (value) {
+              if (value == 'text') {
+                TaskExport.shareAsText(widget.category.name, allTasks);
+              } else if (value == 'pdf') {
+                TaskExport.shareAsPdf(widget.category.name, allTasks);
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'text', child: Text('Metin olarak paylaş')),
+              PopupMenuItem(value: 'pdf', child: Text('PDF olarak paylaş')),
+            ],
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
